@@ -38,6 +38,12 @@ export class Highlighter {
     }
     return this.highlights;
   }
+
+  getDecoration(lineNumber: number) {
+    return this.highlights.find(highlight => {
+      return highlight.lineNumber === lineNumber;
+    });
+  }
 }
 
 export class Highlight {

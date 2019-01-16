@@ -7,7 +7,8 @@ import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
-  TransportKind
+  TransportKind,
+  TextDocument
 } from 'vscode-languageclient/lib/main';
 import { Highlighter, Highlight } from './highlighter';
 
@@ -179,20 +180,38 @@ export function activate(context: vscode.ExtensionContext) {
 
   function executeHighlight(
     lineNumber: string | undefined,
-    twitchUser: string = 'self'
+    twitchUser: string = 'self',
+    fileName?: string | undefined
   ) {
     if (!lineNumber || isNaN(+lineNumber)) {
       return;
     }
     const lineNumberInt: number = parseInt(lineNumber);
 
-    let editor = vscode.window.activeTextEditor;
-    if (editor) {
-      let doc = editor.document;
-      let existingHighlighter = highlighters.find(highlighter => {
-        return highlighter.editor.document.fileName === doc.fileName;
-      });
-      let range = getHighlightRange(lineNumber, doc);
+    if (!fileName) {
+      let editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        console.warn('No file found to highlight');
+        return;
+      }
+      fileName = editor.document.fileName;
+    }
+
+    const existingHighlighter = findHighlighter(fileName);
+    if (existingHighlighter) {
+      const existingDecoration = existingHighlighter.getDecoration(
+        lineNumberInt
+      );
+      if (existingDecoration && existingDecoration.twitchUser === twitchUser) {
+        console.warn(
+          `Twitch user ${twitchUser} tried to add a highlight they've already submitted`
+        );
+        return;
+      }
+      let range = getHighlightRange(
+        lineNumber,
+        existingHighlighter.editor.document
+      );
       let decoration = {
         range,
         hoverMessage: `From @${twitchUser === 'self' ? 'You' : twitchUser}`
@@ -200,10 +219,39 @@ export function activate(context: vscode.ExtensionContext) {
       addHighlight(
         existingHighlighter,
         decoration,
-        editor,
+        existingHighlighter.editor,
         lineNumberInt,
         twitchUser
       );
+    }
+
+    // else we need to find the file
+    const textDocument = vscode.workspace.textDocuments.find(textDocument => {
+      return textDocument.fileName === fileName;
+    });
+
+    if (!textDocument) {
+      console.warn(
+        `A document was not found for the file name supplied ${fileName} from ${twitchUser}`
+      );
+      return;
+    }
+
+    let documentEditor = vscode.window.visibleTextEditors.find(textEditor => {
+      return textEditor.document.fileName === textDocument.fileName;
+    });
+    if (!documentEditor) {
+      // open an editor for the textdocument
+      vscode.window.showTextDocument(textDocument.uri).then(editor => {
+        let range = getHighlightRange(lineNumber, textDocument);
+
+        let decoration = {
+          range,
+          hoverMessage: `From @${twitchUser === 'self' ? 'You' : twitchUser}`
+        };
+
+        addHighlight(undefined, decoration, editor, lineNumberInt, twitchUser);
+      });
     }
   }
 
