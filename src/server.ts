@@ -161,16 +161,6 @@ connection.onDidChangeConfiguration(change => {
   // disconnect = connectIRC(settings);
 });
 
-let settings: TwitchHighlighterSettings = {
-  connect: true,
-  server: 'irc.chat.twitch.tv',
-  port: 80,
-  password: '',
-  nickname: 'clarkio',
-  channel: '#clarkio',
-  command: ':highlight'
-};
-
 // #region hide this for now
 function getTwitchChatOptions() {
   return {

@@ -50,7 +50,7 @@
       },
       {
         "command": "twitchhighlighter.setTwitchPassword",
-        "title": "Twitch Highlighter: Set Password"        
+        "title": "Twitch Highlighter: Set Password"
       },
       {
         "command": "twitchhighlighter.removeTwitchPassword",
