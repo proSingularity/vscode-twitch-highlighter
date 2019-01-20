@@ -109,9 +109,10 @@ function parseMessage(userName: string, message: string) {
   } else {
     // Format Example: !<command> <line number> <filename.ts>
     // Other Example: !<command> <line number> <filename.ts> <color>
+    console.log('MADE IT HERE');
     connection.sendNotification(notificationType, {
       line: lineNumber,
-      filename: messageParts[1],
+      fileName: messageParts[1],
       twitchUser: userName
     });
   }
@@ -132,15 +133,14 @@ function isHighlightCommand(message: string) {
 
 // These are the example settings we defined in the client's package.json
 // file
-interface TwitchHighlighterSettings {
-  connect: boolean;
-  server: string;
-  nickname: string;
-  channel: string;
-  password: string;
-  command: string;
-  port: number;
-}
+// interface TwitchHighlighterSettings {
+//   connect: boolean;
+//   server: string;
+//   nickname: string;
+//   channel: string;
+//   command: string;
+//   port: number;
+// }
 connection.onShutdown(() => {
   connection.sendNotification('exited');
 
