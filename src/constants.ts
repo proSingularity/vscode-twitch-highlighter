@@ -1,5 +1,6 @@
 export const extensionId = 'clarkio.twitch-highlighter';
 export const extSuffix = 'twitchHighlighter';
+export const commandRegex = /!(?:line|highlight) (?:((?:[w]+)?.?[w]*) )?(!)?(d+)(?:-{1}(d+))?(?: ((?:[w]+)?.[w]{1,}))?(?: (.+))?/i;
 
 export enum Settings {
   'channels' = 'channels',

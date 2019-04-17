@@ -231,6 +231,7 @@
     "@types/tmi.js": "^1.4.0",
     "clean-webpack-plugin": "^1.0.1",
     "mocha-junit-reporter": "^1.18.0",
+    "redos": "^1.0.1",
     "spec-xunit-file": "0.0.1-3",
     "ts-loader": "^5.3.3",
     "tslint": "^5.8.0",

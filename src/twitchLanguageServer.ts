@@ -7,10 +7,11 @@ import {
   InitializedParams,
   TextDocumentSyncKind
 } from 'vscode-languageserver/lib/main';
-import { Commands, InternalCommands } from './constants';
-
 import * as tmi from 'tmi.js';
+
+import { Commands, InternalCommands } from './constants';
 import { log } from './logger';
+import { commandRegex } from './constants';
 
 let botparams: {
   announce: boolean;
@@ -143,9 +144,8 @@ export function parseMessage(
    * !highlight 5
    *
    */
-  const commandPattern = /\!(?:line|highlight) (?:((?:[\w]+)?\.?[\w]*) )?(\!)?(\d+)(?:-{1}(\d+))?(?: ((?:[\w]+)?\.[\w]{1,}))?(?: (.+))?/i;
 
-  const cmdopts = commandPattern.exec(message);
+  const cmdopts = commandRegex.exec(message);
   if (!cmdopts) {
     return;
   }

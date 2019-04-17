@@ -1,5 +1,7 @@
 import * as assert from 'assert';
 import { parseMessage } from '../twitchLanguageServer';
+import { commandRegex } from '../constants';
+var redos = require('redos');
 
 interface Theory {
   twitchUser: string;
@@ -11,9 +13,7 @@ interface Theory {
 }
 
 suite('twitchLanguageServer Tests', function() {
-
   test('Ensure parseMessage returns expected results', () => {
-
     const theories: Theory[] = [
       {
         twitchUser: 'clarkio',
@@ -80,18 +80,23 @@ suite('twitchLanguageServer Tests', function() {
       }
     ];
 
-    theories.forEach(({twitchUser, message, startLine, endLine, fileName, comment}) => {
-      const result = parseMessage('channel', twitchUser, message);
-      assert.ok(result);
-      if (result) {
-        assert.equal(result.twitchUser, twitchUser);
-        assert.equal(result.startLine, startLine);
-        assert.equal(result.endLine, endLine);
-        assert.equal(result.fileName, fileName);
-        assert.equal(result.comment, comment);
+    theories.forEach(
+      ({ twitchUser, message, startLine, endLine, fileName, comment }) => {
+        const result = parseMessage('channel', twitchUser, message);
+        assert.ok(result);
+        if (result) {
+          assert.equal(result.twitchUser, twitchUser);
+          assert.equal(result.startLine, startLine);
+          assert.equal(result.endLine, endLine);
+          assert.equal(result.fileName, fileName);
+          assert.equal(result.comment, comment);
+        }
       }
-    });
-
+    );
   });
 
+  test('Check regex pattern for Regular Expression Denial of Service Vulnerabilities', done => {
+    console.log(redos(commandRegex).results());
+    done();
+  });
 });
