@@ -7,6 +7,7 @@ import {
 import { workspace, window, Disposable } from 'vscode';
 import CredentialManager from './credentialManager';
 import { extSuffix, Settings, Commands, InternalCommands } from './constants';
+import { log } from './logger';
 
 export class TwitchChatClient {
   private readonly _languageClient: LanguageClient;
@@ -102,7 +103,8 @@ export class TwitchChatClient {
         if (this.onDisconnected) {
           this.onDisconnected();
           this._isConnected = false;
-          console.error(
+          log(
+            'error',
             'An unhandled exception occured while connecting to the twitch chat client.',
             err
           );
@@ -132,7 +134,8 @@ export class TwitchChatClient {
         );
       },
       rejected => {
-        console.error(
+        log(
+          'error',
           'An unhandled error occured while disconnecting from Twitch chat.',
           rejected
         );
@@ -156,7 +159,7 @@ export class TwitchChatClient {
       announce: configuration.get<boolean>(Settings.announceBot) || false,
       joinMessage: configuration.get<string>(Settings.joinMessage) || '',
       leaveMessage: configuration.get<string>(Settings.leaveMessage) || '',
-      usageTip: configuration.get<string>(Settings.usageTip) || '',
+      usageTip: configuration.get<string>(Settings.usageTip) || ''
     };
     this._languageClient.sendRequest(Commands.startChat, chatParams).then(
       result => {
@@ -169,7 +172,7 @@ export class TwitchChatClient {
         }
       },
       rejected => {
-        console.error(`Unable to connect to twitch chat irc.`, rejected);
+        log('error', `Unable to connect to twitch chat irc.`, rejected);
         window.showErrorMessage('Twitch Highlighter: Unable to connect.');
         if (this.onDisconnected) {
           this._isConnected = false;
@@ -207,12 +210,11 @@ export class TwitchChatClient {
 
   private setup() {
     this._languageClient.onNotification('error', (params: any) => {
-      console.error('An unhandled error from TwitchServer has been reached.');
+      log('error', 'An unhandled error from TwitchServer has been reached.');
       window.showErrorMessage(params.message);
     });
 
     this._languageClient.onNotification(Commands.highlight, (params: any) => {
-      console.log('highlight requested.', params);
       if (this.onHighlight) {
         this.onHighlight(
           params.twitchUser,
@@ -225,7 +227,6 @@ export class TwitchChatClient {
     });
 
     this._languageClient.onNotification(Commands.unhighlight, (params: any) => {
-      console.log('unhighlight requested.', params);
       if (this.onUnhighlight) {
         this.onUnhighlight(params.endLine, params.fileName);
       }

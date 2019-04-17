@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { Highlighter, Highlight } from './highlighter';
+import { log } from './logger';
 
 export class TwitchHighlighterDataProvider
   implements vscode.TreeDataProvider<HighlighterNode> {
@@ -10,9 +11,9 @@ export class TwitchHighlighterDataProvider
   readonly onDidChangeTreeData: vscode.Event<HighlighterNode | undefined> = this
     ._onDidChangeTreeData.event;
 
-  constructor(private getHighlighters = (): Highlighter[] => []) { }
+  constructor(private getHighlighters = (): Highlighter[] => []) {}
   refresh(): void {
-    console.log('Refreshing twitch highlighter tree view.');
+    log('info', 'Refreshing twitch highlighter tree view.');
     this._onDidChangeTreeData.fire();
   }
   getTreeItem(element: HighlighterNode): vscode.TreeItem {
@@ -31,7 +32,6 @@ export class TwitchHighlighterDataProvider
       const highlights = highlighter.highlights;
       const document = highlighter.editor.document;
       const label = path.basename(highlighter.editor.document.fileName);
-      console.log('fileName', document);
       highlighterNodes.push(
         new HighlighterNode(
           label,

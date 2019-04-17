@@ -10,6 +10,7 @@ import {
 import { Commands, InternalCommands } from './constants';
 
 import * as tmi from 'tmi.js';
+import { log } from './logger';
 
 let botparams: {
   announce: boolean;
@@ -53,7 +54,7 @@ connection.onRequest(Commands.stopChat, async () => {
       return true;
     })
     .catch(error => {
-      console.error(error);
+      log('error', error);
       throw error;
     });
 });
@@ -67,8 +68,8 @@ connection.onRequest(Commands.startChat, async params => {
     ttvChatClient.on('chat', onTtvChatMessage);
     ttvChatClient.on('ban', onTtvBanUser);
   } catch (error) {
-    console.error('There was an issue connecting to Twitch');
-    console.error(error);
+    log('error', 'There was an issue connecting to Twitch');
+    log('error', error);
     throw error;
   }
 });
@@ -181,11 +182,11 @@ connection.onShutdown(() => {
   ttvChatClient
     .disconnect()
     .then(() => {
-      console.log(`Successfully disconnected from the Twitch chat`);
+      log('info', `Successfully disconnected from the Twitch chat`);
     })
     .catch((error: any) => {
-      console.error(`There was an error disconnecting from the Twitch chat`);
-      console.error(error);
+      log('error', `There was an error disconnecting from the Twitch chat`);
+      log('error', error);
     });
 });
 function getTwitchChatOptions(params: {

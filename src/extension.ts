@@ -12,6 +12,7 @@ import {
 import { TwitchChatClient } from './twitchChatClient';
 import { isArray } from 'util';
 import { extSuffix, Settings, Commands } from './constants';
+import { log } from './logger';
 
 let highlightDecorationType: vscode.TextEditorDecorationType;
 const twitchHighlighterStatusBarIcon: string = '$(plug)'; // The octicon to use for the status bar icon (https://octicons.github.com/)
@@ -128,10 +129,10 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage(
           `Failed to remove the Twitch Chat Client Id`
         );
-        console.error(
+        log('error',
           'An error occured while removing your Client Id from the keychain'
         );
-        console.error(reason);
+        log('error', reason);
       });
   }
 
@@ -160,13 +161,11 @@ export function activate(context: vscode.ExtensionContext) {
         );
       })
       .catch(reason => {
-        vscode.window.showInformationMessage(
-          `Failed to set Twitch Chat token`
-        );
-        console.error(
+        vscode.window.showInformationMessage(`Failed to set Twitch Chat token`);
+        log('error',
           'An error occured while saving your token to the keychain'
         );
-        console.error(reason);
+        log('error', reason);
       });
     return true;
   }
@@ -182,10 +181,10 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage(
           `Failed to remove the Twitch Chat token`
         );
-        console.error(
+        log('error',
           'An error occured while removing your token from the keychain'
         );
-        console.error(reason);
+        log('error', reason);
       });
   }
 
@@ -335,15 +334,14 @@ function highlight(
   fileName?: string,
   comment?: string
 ) {
-  console.log(`highlight called.`);
   if (!startLine) {
-    console.warn('A line number was not provided to highlight');
+    log('warn', 'A line number was not provided to highlight');
     return;
   }
 
   let editor = vscode.window.activeTextEditor;
   if (!editor) {
-    console.log('No active text editor is present.');
+    log('warn', 'No active text editor is present.');
     return;
   }
 
@@ -359,7 +357,8 @@ function highlight(
       h => h.twitchUser === twitchUser && h.startLine === startLine
     )
   ) {
-    console.log(
+    log(
+      'info',
       `An existing highlight already exists for '${twitchUser}' starting on line '${startLine}'`
     );
     return;
@@ -371,7 +370,7 @@ function highlight(
      * TODO: Maybe whisper to the end-user that the line requested is empty.
      * Although whispers aren't gaurenteed to reach the end-user.
      */
-    console.log(`line #'${startLine}' is empty. Cancelled.`);
+    log('warn', `line #'${startLine}' is empty. Cancelled.`);
     return;
   }
 
@@ -379,7 +378,7 @@ function highlight(
     range,
     hoverMessage: `From @${twitchUser === 'self' ? 'You' : twitchUser}${
       comment !== undefined ? `: ${comment}` : ''
-      }`
+    }`
   };
 
   addHighlight(
@@ -393,7 +392,6 @@ function highlight(
 }
 
 function unhighlight(lineNumber: number, fileName?: string) {
-  console.log('unhighlight called.');
   if (!lineNumber) {
     vscode.window.showWarningMessage(
       'A line number was not provided to unhighlight.'
@@ -489,7 +487,11 @@ function addHighlight(
 }
 
 function removeHighlight(username: string): void;
-function removeHighlight(lineNumber: number, fileName: string, deferRefresh?: boolean): void;
+function removeHighlight(
+  lineNumber: number,
+  fileName: string,
+  deferRefresh?: boolean
+): void;
 function removeHighlight(
   searchQuery: string | number,
   fileName?: string,
@@ -497,15 +499,21 @@ function removeHighlight(
 ) {
   if (isNaN(Number(searchQuery))) {
     const username = searchQuery as string;
-    highlighters.forEach(highlighter => highlighter.removeDecorations(username));
+    highlighters.forEach(highlighter =>
+      highlighter.removeDecorations(username)
+    );
   }
   // the searchQuery is a number (lineNumber)
   else {
-    if (!fileName) { return; } // the fileName should always be truthy, but tslint generates warnings.
+    if (!fileName) {
+      return;
+    } // the fileName should always be truthy, but tslint generates warnings.
 
     const existingHighlight = findHighlighter(fileName);
     if (!existingHighlight) {
-      console.warn(`Highlight not found so can't unhighlight the line from file`);
+      console.warn(
+        `Highlight not found so can't unhighlight the line from file`
+      );
       return;
     }
 
@@ -578,8 +586,10 @@ function updateChannelsSetting() {
 function setupDecoratorType() {
   const configuration = vscode.workspace.getConfiguration(extSuffix);
   highlightDecorationType = vscode.window.createTextEditorDecorationType({
-    backgroundColor: configuration.get<string>(Settings.highlightColor) || 'green',
-    border: configuration.get<string>(Settings.highlightBorder) || '2px solid white',
+    backgroundColor:
+      configuration.get<string>(Settings.highlightColor) || 'green',
+    border:
+      configuration.get<string>(Settings.highlightBorder) || '2px solid white',
     color: configuration.get<string>(Settings.highlightFontColor) || 'white'
   });
 }
